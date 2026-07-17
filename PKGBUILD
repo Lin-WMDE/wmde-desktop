@@ -3,12 +3,12 @@
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
 pkgver=0.2.0
-pkgrel=1
+pkgrel=2
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
 license=('GPL-3.0-only')
-depends=('wmde-session' 'wmde-files')
+depends=('wmde-session' 'wmde-files' 'wmde-term')
 # TODO (as they land): 'wmde-config' 'inter-font'
 
 package() {
