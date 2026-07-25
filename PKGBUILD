@@ -2,8 +2,8 @@
 # Metapackage: pulls the whole WMDE environment in one `pacman -S wmde-desktop`.
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
-pkgver=1.3.1
-pkgrel=3
+pkgver=1.4.0
+pkgrel=1
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
