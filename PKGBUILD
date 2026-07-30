@@ -13,7 +13,10 @@ license=('GPL-3.0-only')
 # writes the palette into ~/.config/qt6ct. Without the plugin nothing reads it.
 # wmde-sysinfo was absorbed by wmde-settings (Hardware sub-page); wmde-settings
 # replaces it, so pacman removes the old package on upgrade.
-depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-settings' 'qt6ct')
+# wmde-themes is mandatory, not cosmetic: it carries every default that decides how the
+# desktop looks. Without it the stack falls back to the values compiled into libcosmic,
+# which are upstream COSMIC's and drift on every merge.
+depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-settings' 'wmde-themes' 'qt6ct')
 # TODO (as they land): 'wmde-config' 'inter-font'
 
 package() {
