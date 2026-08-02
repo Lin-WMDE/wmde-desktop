@@ -3,12 +3,12 @@
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
 pkgver=1.5.0
-# Bumped for the font dependencies below. This metapackage has a STATIC pkgver - no
+# Bumped for the Vulkan dependencies below. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
-# exactly what happened: the theme defaults left the old packages, the new dependency was
-# never seen, and the desktop lost every appearance default it had.
-pkgrel=3
+# exactly what happened once: the theme defaults left the old packages, the new dependency
+# was never seen, and the desktop lost every appearance default it had.
+pkgrel=4
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
@@ -29,8 +29,19 @@ license=('GPL-3.0-only')
 # the ENTIRE font database, uncached, once per character. Measured on a VM where six of the
 # nine families did not resolve: 11607 such walks in one wmde-files run, 12 s of CPU and
 # 155 MB of RSS on top of a 45 MB baseline.
+# Vulkan is the ONLY backend compiled into the renderer: iced_wgpu's default feature is
+# wgpu/vulkan (forks/libcosmic/iced/wgpu/Cargo.toml), there is no GL or software backend to
+# fall back on inside wgpu. vulkan-icd-loader carries libvulkan.so.1 and vulkan-driver is the
+# virtual package every real ICD provides - pacman asks which one on install.
+# Neither can be detected automatically: ash dlopens libvulkan.so.1 through libloading, so it
+# never appears in ldd and makepkg's dependency scan cannot see it. Without them the whole
+# stack falls to the tiny-skia software renderer - it still draws, but every process pays for
+# it in CPU. A software ICD (vulkan-swrast) satisfies vulkan-driver yet buys nothing: the
+# compositor rejects llvmpipe/lavapipe adapters on purpose and goes to tiny-skia anyway
+# (is_rejected_software_adapter in iced/wgpu/src/window/compositor.rs).
 depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-settings' 'wmde-themes' 'qt6ct'
-         'noto-fonts' 'noto-fonts-emoji' 'ttf-dejavu' 'gnu-free-fonts')
+         'noto-fonts' 'noto-fonts-emoji' 'ttf-dejavu' 'gnu-free-fonts'
+         'vulkan-icd-loader' 'vulkan-driver')
 # TODO (as they land): 'wmde-config' 'inter-font'
 
 package() {
