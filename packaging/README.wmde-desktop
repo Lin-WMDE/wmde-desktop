@@ -1,0 +1,12 @@
+WMDE desktop bundle
+====================
+
+Installing this package pulls the full WMDE environment in one step:
+session, compositor, panel, applets, applications, themes and fonts.
+
+Qt6/KDE applications pick up the WMDE palette through qt6ct
+(see wmde-desktop / wmde-session packaging notes).
+
+Vulkan is the only renderer backend: make sure a Vulkan ICD is installed
+(mesa-vulkan-drivers covers most hardware). Without one, the stack falls
+back to the tiny-skia software renderer.

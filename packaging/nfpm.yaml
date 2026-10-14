@@ -1,0 +1,124 @@
+# Один конфиг nFPM на оба формата. Версия СТАТИЧНАЯ 1.10.0, как pkgver в PKGBUILD
+# (там нет pkgver()-функции специально: только pkgrel двигается).
+# ВАЖНО: только ${WMDE_VERSION} без :-дефолта — nFPM раскрывает env через
+# os.ExpandEnv и :- не понимает (версия молча станет 0.0.0~rc0).
+name: wmde-desktop
+arch: all
+version: ${WMDE_VERSION}
+release: 1
+maintainer: WMDE <wmde@wmde.fun>
+description: |-
+  WMDE desktop metapackage
+  Installs the full WMDE environment in one step.
+homepage: https://wmde.fun
+license: GPL-3.0-only
+section: metapackages
+
+# Наши пакеты — в recommends: их пока нет в репозиториях дистрибутивов,
+# apt/dnf ставят Recommends по умолчанию. Когда выйдет единый репозиторий
+# WMDE — переключить в depends. Шрифты, qt6ct и vulkan-загрузчик — жёстко.
+depends:
+  - qt6ct
+  - fonts-noto
+  - fonts-noto-mono
+  - fonts-noto-color-emoji
+  - fonts-dejavu
+  - fonts-freefont-ttf
+  - libvulkan1
+
+recommends:
+  - wmde-session
+  - wmde-files
+  - wmde-term
+  - wmde-settings
+  - wmde-panel
+  - wmde-osd
+  - wmde-notifications
+  - wmde-applets
+  - wmde-bg
+  - wmde-start-menu
+  - wmde-portal
+  - wmde-greeter
+  - wmde-themes
+  - wmde-icons-base
+  - mesa-vulkan-drivers
+
+contents:
+  # README только в deb: в rpm нет %doc-разметки у nFPM (E not-listed-as-documentation),
+  # а метапакету файлов и не положено — только зависимости.
+  - src: packaging/README.wmde-desktop
+    dst: /usr/share/doc/wmde-desktop/README.wmde-desktop
+    file_info: { mode: 0644 }
+    packager: deb
+  # doc (copyright + changelog.Debian.gz) готовит just package-doc.
+  # Только для deb: в rpm нет %doc-разметки у nFPM,
+  # а лицензия и changelog там и так есть (License-тег + %changelog).
+  - src: target/staging/usr/share/doc/wmde-desktop/
+    dst: /usr/share/doc/wmde-desktop/
+    type: tree
+    packager: deb
+
+# %changelog для rpm генерит just package-doc (иначе E: no-changelogname-tag).
+# Путь от корня репо: nFPM резолвит его от cwd, а не от каталога конфига.
+changelog: target/changelog.yaml
+
+overrides:
+  deb:
+    depends:
+      - qt6ct
+      - fonts-noto
+      - fonts-noto-mono
+      - fonts-noto-color-emoji
+      - fonts-dejavu
+      - fonts-freefont-ttf
+      - libvulkan1
+    recommends:
+      - wmde-session
+      - wmde-files
+      - wmde-term
+      - wmde-settings
+      - wmde-panel
+      - wmde-osd
+      - wmde-notifications
+      - wmde-applets
+      - wmde-bg
+      - wmde-start-menu
+      - wmde-portal
+      - wmde-greeter
+      - wmde-themes
+      - wmde-icons-base
+      - mesa-vulkan-drivers
+  rpm:
+    # Шрифты — через виртуальные font()-provides: имена пакетов сильно
+    # расходятся (Fedora режет по семействам, openSUSE свои), а provides
+    # вида font(notosans) генерят обе семьи (проверено установкой).
+    depends:
+      - qt6ct
+      - font(notosans)
+      - font(notosansmono)
+      # symbols: виртуала font(notosanssymbols) нет на TW, а имя пакета
+      # google-noto-sans-symbols-fonts одинаковое в обеих семьях.
+      - google-noto-sans-symbols-fonts
+      - font(notocoloremoji)
+      - font(dejavusans)
+      - font(dejavusansmono)
+      - font(freesans)
+      - font(freemono)
+      # vulkan: Fedora vulkan-loader, TW libvulkan1 (пакета "vulkan-loader" там нет).
+      - (vulkan-loader or libvulkan1)
+    recommends:
+      - wmde-session
+      - wmde-files
+      - wmde-term
+      - wmde-settings
+      - wmde-panel
+      - wmde-osd
+      - wmde-notifications
+      - wmde-applets
+      - wmde-bg
+      - wmde-start-menu
+      - wmde-portal
+      - wmde-greeter
+      - wmde-themes
+      - wmde-icons-base
+      - mesa-vulkan-drivers

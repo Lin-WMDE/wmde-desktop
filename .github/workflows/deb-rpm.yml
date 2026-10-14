@@ -1,0 +1,126 @@
+# Проверяет deb/rpm-упаковку: сборка, содержимое, установка в чистых контейнерах.
+#
+# Опорные платформы — Debian stable и Fedora: собранное на них встаёт везде
+# ниже по течению (Ubuntu/Mint, RHEL/openSUSE), обратное не гарантируется.
+# Поэтому .deb собираем в debian:13, .rpm — в fedora:44.
+#
+# Метапакет: файлов нет, только зависимости. Тулчейн не нужен.
+name: deb-rpm packaging
+
+on:
+  push:
+    paths:
+      - packaging/**
+      - justfile
+      - INSTALL.deb-rpm.md
+      - .github/workflows/deb-rpm.yml
+  pull_request:
+    paths:
+      - packaging/**
+      - justfile
+      - INSTALL.deb-rpm.md
+      - .github/workflows/deb-rpm.yml
+
+defaults:
+  run:
+    working-directory: wmde-desktop
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-24.04
+    container:
+      image: debian:13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: wmde-desktop
+          fetch-depth: 0
+      - name: Build deps
+        run: |
+          apt-get update
+          apt-get install -y curl lintian
+          curl -sSfL https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz -o /tmp/just.tgz
+          tar xzf /tmp/just.tgz -C /usr/local/bin just
+      - name: Install nfpm
+        run: |
+          curl -sSfL https://github.com/goreleaser/nfpm/releases/download/v2.43.0/nfpm_2.43.0_amd64.deb -o /tmp/nfpm.deb
+          apt-get install -y /tmp/nfpm.deb
+      - name: Build .deb
+        run: |
+          just deb
+          dpkg-deb -c target/*.deb
+          lintian --no-tag-display-limit target/*.deb || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wmde-desktop-deb
+          path: wmde-desktop/target/*.deb
+
+  build-rpm:
+    runs-on: ubuntu-24.04
+    container:
+      image: fedora:44
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: wmde-desktop
+          fetch-depth: 0
+      - name: Build deps
+        run: dnf install -y tar gzip rpmdevtools rpmlint
+      - name: Install just and nfpm
+        run: |
+          curl -sSfL https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz -o /tmp/just.tgz
+          tar xzf /tmp/just.tgz -C /usr/local/bin just
+          curl -sSfL https://github.com/goreleaser/nfpm/releases/download/v2.43.0/nfpm-2.43.0-1.x86_64.rpm -o /tmp/nfpm.rpm
+          dnf install -y /tmp/nfpm.rpm
+      - name: Build .rpm
+        run: |
+          just rpm
+          rpm -qpl target/*.rpm
+          rpmlint target/*.rpm || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wmde-desktop-rpm
+          path: wmde-desktop/target/*.rpm
+
+  install-deb:
+    needs: build-deb
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        image: ["debian:13", "ubuntu:24.04"]
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wmde-desktop-deb
+          path: /tmp/pkg
+      - name: Install and check
+        run: |
+          apt-get update
+          apt-get install -y /tmp/pkg/*.deb
+          dpkg -l wmde-desktop
+
+  install-rpm:
+    needs: build-rpm
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        image: ["fedora:44", "opensuse/tumbleweed"]
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wmde-desktop-rpm
+          path: /tmp/pkg
+      - name: Install and check (dnf)
+        if: startsWith(matrix.image, 'fedora')
+        run: |
+          dnf install -y /tmp/pkg/*.rpm
+          rpm -q wmde-desktop
+      - name: Install and check (zypper)
+        if: startsWith(matrix.image, 'opensuse')
+        run: |
+          zypper --non-interactive install --allow-unsigned-rpm /tmp/pkg/*.rpm
+          rpm -q wmde-desktop
