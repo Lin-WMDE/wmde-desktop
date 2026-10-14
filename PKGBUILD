@@ -2,7 +2,7 @@
 # Metapackage: pulls the whole WMDE environment in one `pacman -S wmde-desktop`.
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
-pkgver=1.10.0
+pkgver=1.10.1
 # Bumped for the Vulkan dependencies below. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
