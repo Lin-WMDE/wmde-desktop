@@ -3,12 +3,12 @@
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
 pkgver=1.10.1
-# Bumped for power-profiles-daemon below. This metapackage has a STATIC pkgver - no
+# Bumped for wmde-edit below. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
 # exactly what happened once: the theme defaults left the old packages, the new dependency
 # was never seen, and the desktop lost every appearance default it had.
-pkgrel=2
+pkgrel=3
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
@@ -44,7 +44,10 @@ license=('GPL-3.0-only')
 # settings say "Backend not found" and the applet's profile rows do nothing. It is D-Bus
 # activated, nothing has to enable it. tlp conflicts with it: whoever picks tlp drops
 # this metapackage, the components stay.
-depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-settings' 'wmde-themes' 'qt6ct'
+# wmde-edit: the notepad. wmde-session's mimeapps list assigns it plain text, configs,
+# scripts and source code; it is in the Start menu, not pinned to the panel.
+depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-edit' 'wmde-settings' 'wmde-themes'
+         'qt6ct'
          'noto-fonts' 'noto-fonts-emoji' 'ttf-dejavu' 'gnu-free-fonts'
          'vulkan-icd-loader' 'vulkan-driver' 'power-profiles-daemon')
 # TODO (as they land): 'wmde-config' 'inter-font'
