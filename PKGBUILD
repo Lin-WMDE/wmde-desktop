@@ -3,12 +3,12 @@
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
 pkgver=1.10.1
-# Bumped for the Vulkan dependencies below. This metapackage has a STATIC pkgver - no
+# Bumped for power-profiles-daemon below. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
 # exactly what happened once: the theme defaults left the old packages, the new dependency
 # was never seen, and the desktop lost every appearance default it had.
-pkgrel=1
+pkgrel=2
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
@@ -39,9 +39,14 @@ license=('GPL-3.0-only')
 # it in CPU. A software ICD (vulkan-swrast) satisfies vulkan-driver yet buys nothing: the
 # compositor rejects llvmpipe/lavapipe adapters on purpose and goes to tiny-skia anyway
 # (is_rejected_software_adapter in iced/wgpu/src/window/compositor.rs).
+# power-profiles-daemon: the power profiles (power saver, balanced, performance) that the
+# Power mode section of the settings and the battery applet switch; without it the
+# settings say "Backend not found" and the applet's profile rows do nothing. It is D-Bus
+# activated, nothing has to enable it. tlp conflicts with it: whoever picks tlp drops
+# this metapackage, the components stay.
 depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-settings' 'wmde-themes' 'qt6ct'
          'noto-fonts' 'noto-fonts-emoji' 'ttf-dejavu' 'gnu-free-fonts'
-         'vulkan-icd-loader' 'vulkan-driver')
+         'vulkan-icd-loader' 'vulkan-driver' 'power-profiles-daemon')
 # TODO (as they land): 'wmde-config' 'inter-font'
 
 package() {
