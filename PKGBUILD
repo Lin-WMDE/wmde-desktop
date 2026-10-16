@@ -2,13 +2,13 @@
 # Metapackage: pulls the whole WMDE environment in one `pacman -S wmde-desktop`.
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
-pkgver=1.10.1
-# Bumped for wmde-edit below. This metapackage has a STATIC pkgver - no
+pkgver=1.10.2
+# Bumped for the WMDE 1.10.2 release. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
 # exactly what happened once: the theme defaults left the old packages, the new dependency
 # was never seen, and the desktop lost every appearance default it had.
-pkgrel=3
+pkgrel=1
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
