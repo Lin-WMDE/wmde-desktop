@@ -3,12 +3,12 @@
 # Grows as components land: wmde-files, wmde-config, inter-font.
 pkgname=wmde-desktop
 pkgver=1.10.2
-# Bumped for the WMDE 1.10.2 release. This metapackage has a STATIC pkgver - no
+# Bumped for rtkit below. This metapackage has a STATIC pkgver - no
 # pkgver() function - so pkgrel is the only thing that moves, and a depends-only change
 # without it ships a package pacman considers identical to the installed one. That is
 # exactly what happened once: the theme defaults left the old packages, the new dependency
 # was never seen, and the desktop lost every appearance default it had.
-pkgrel=1
+pkgrel=2
 pkgdesc="WMDE desktop metapackage: installs the full WMDE environment"
 arch=('any')
 url="https://wmde.fun"
@@ -46,10 +46,12 @@ license=('GPL-3.0-only')
 # this metapackage, the components stay.
 # wmde-edit: the notepad. wmde-session's mimeapps list assigns it plain text, configs,
 # scripts and source code; it is in the Start menu, not pinned to the panel.
+# rtkit: real-time priority for PipeWire, which runs without it but then crackles under
+# load. Policy for the whole desktop, so here and not in a component.
 depends=('wmde-session' 'wmde-files' 'wmde-term' 'wmde-edit' 'wmde-settings' 'wmde-themes'
          'qt6ct'
          'noto-fonts' 'noto-fonts-emoji' 'ttf-dejavu' 'gnu-free-fonts'
-         'vulkan-icd-loader' 'vulkan-driver' 'power-profiles-daemon')
+         'vulkan-icd-loader' 'vulkan-driver' 'power-profiles-daemon' 'rtkit')
 # TODO (as they land): 'wmde-config' 'inter-font'
 
 package() {
